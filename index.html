@@ -2621,10 +2621,12 @@ function monthIndicesFromDates(from, to) {
   }, []);
 }
 
-/* Always returns 3 months ending at the latest month in monthIndices,
-   so trend charts show context even when a single month is filtered. */
+/* Returns trend indices for charts:
+   - 3+ months selected → use the full filter range as-is
+   - 1–2 months selected → expand to 3 months for context */
 function getTrendIndices(monthIndices) {
   if (!monthIndices || monthIndices.length === 0) return monthIndices;
+  if (monthIndices.length >= 3) return monthIndices;
   const maxIdx = Math.max(...monthIndices);
   const startIdx = Math.max(0, maxIdx - 2);
   const result = [];
