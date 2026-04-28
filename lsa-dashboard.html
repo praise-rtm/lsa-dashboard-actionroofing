@@ -4312,20 +4312,101 @@ window.addEventListener('load', () => {
 });
 /* ── Call Detail Modal ── */
 let _modalRows = [];
+let _transcriptMap = null;   // lazy-loaded from transcripts.json
+let _transcriptLoading = false;
+let _pendingModalIdx = null;
 
-function openCallModal(idx) {
+function _normalizePhone(p) {
+  return (p || '').replace(/\D/g, '').slice(-10);
+}
+
+function _renderTranscript(raw) {
+  const box = document.getElementById('modal-transcript');
+  if (!raw || raw === '—') {
+    box.innerHTML = '<span style="color:#94a3b8;font-style:italic;">No transcript available for this call.</span>';
+    return;
+  }
+  const lines = raw.split(/(?=\b(?:Caller|Agent):\s)/);
+  const hasSpeakers = /\b(?:Caller|Agent):\s/.test(raw);
+  if (hasSpeakers) {
+    box.innerHTML = lines.map(line => {
+      const m = line.match(/^(Caller|Agent):\s*([\s\S]*)/);
+      if (!m) return line ? `<div style="color:var(--text-muted);margin-bottom:6px;">${line}</div>` : '';
+      const speaker = m[1], text = m[2].trim();
+      const isAgent = speaker === 'Agent';
+      const color   = isAgent ? 'var(--primary)' : 'var(--accent)';
+      const bg      = isAgent ? 'rgba(0,75,116,.06)' : 'rgba(215,137,31,.06)';
+      return `<div style="margin-bottom:10px;padding:8px 12px;border-radius:8px;background:${bg};border-left:3px solid ${color};">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:4px;">${speaker}</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--text);">${text}</div>
+      </div>`;
+    }).join('');
+  } else {
+    box.innerHTML = `<div style="font-size:13px;line-height:1.8;color:var(--text);">${raw}</div>`;
+  }
+}
+
+function _applyTranscriptToModal(r) {
+  const box = document.getElementById('modal-transcript');
+  const phone = _normalizePhone(r.customerPhone);
+  const key   = `${phone}_${r.date}`;
+
+  if (_transcriptMap && _transcriptMap[key]) {
+    _renderTranscript(_transcriptMap[key]);
+  } else {
+    // Fallback to stored summary snippet
+    const fallback = (r.summary || '').replace(/\\'/g, "'").trim();
+    if (fallback && fallback !== '—') {
+      const note = `<div style="font-size:10px;color:#94a3b8;font-style:italic;margin-bottom:12px;padding:6px 10px;background:rgba(148,163,184,.08);border-radius:6px;">⚠ Full transcript not available — showing call summary excerpt</div>`;
+      box.innerHTML = note;
+      _renderTranscript(fallback);
+    } else {
+      box.innerHTML = '<span style="color:#94a3b8;font-style:italic;">No transcript available for this call.</span>';
+    }
+  }
+}
+
+function _loadTranscriptsAndOpen(idx) {
+  if (_transcriptMap) { _openModalWithData(idx); return; }
+  if (_transcriptLoading) { _pendingModalIdx = idx; return; }
+
+  const box = document.getElementById('modal-transcript');
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-style:italic;">⏳ Loading full transcript…</div>';
+  document.getElementById('call-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  _transcriptLoading = true;
+  _pendingModalIdx = idx;
+
+  fetch('transcripts.json')
+    .then(res => res.json())
+    .then(data => {
+      _transcriptMap = data;
+      _transcriptLoading = false;
+      const pending = _pendingModalIdx;
+      _pendingModalIdx = null;
+      if (pending !== null) _openModalWithData(pending);
+    })
+    .catch(() => {
+      _transcriptMap = {};
+      _transcriptLoading = false;
+      const pending = _pendingModalIdx;
+      _pendingModalIdx = null;
+      if (pending !== null) _openModalWithData(pending);
+    });
+}
+
+function _openModalWithData(idx) {
   const r = _modalRows[idx];
   if (!r) return;
 
   const fmtDate = d => {
-    const [y, m, day] = d.split('-');
+    const [y, mo, day] = d.split('-');
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${months[+m-1]} ${+day}, ${y}`;
+    return `${months[+mo-1]} ${+day}, ${y}`;
   };
-
   const statusIcon = { answered:'✅', missed:'📵', abandoned:'⏸️' };
 
-  // Header meta
   document.getElementById('modal-customer').textContent  = r.customerName || '—';
   document.getElementById('modal-phone').textContent     = r.customerPhone || '—';
   document.getElementById('modal-datetime').textContent  = `${fmtDate(r.date)} · ${r.time}`;
@@ -4333,37 +4414,14 @@ function openCallModal(idx) {
   document.getElementById('modal-duration').textContent  = r.duration;
   document.getElementById('modal-dispatch').textContent  = r.dispatchName || 'Not Mentioned';
 
-  // Full transcript — format Caller / Agent lines with color coding
-  const box = document.getElementById('modal-transcript');
-  const raw = (r.summary || '').replace(/\\'/g, "'").trim();
-
-  if (!raw || raw === '—') {
-    box.innerHTML = '<span style="color:#94a3b8;font-style:italic;">No transcript available for this call.</span>';
-  } else {
-    // Split on Caller: / Agent: labels and render each turn
-    const lines = raw.split(/(?=\b(?:Caller|Agent):\s)/);
-    const hasSpeakers = /\b(?:Caller|Agent):\s/.test(raw);
-    if (hasSpeakers) {
-      box.innerHTML = lines.map(line => {
-        const m = line.match(/^(Caller|Agent):\s*([\s\S]*)/);
-        if (!m) return line ? `<div style="color:var(--text-muted);margin-bottom:6px;">${line}</div>` : '';
-        const speaker = m[1], text = m[2].trim();
-        const isAgent  = speaker === 'Agent';
-        const color    = isAgent ? 'var(--primary)' : 'var(--accent)';
-        const bg       = isAgent ? 'rgba(0,75,116,.06)' : 'rgba(215,137,31,.06)';
-        return `<div style="margin-bottom:10px;padding:8px 12px;border-radius:8px;background:${bg};border-left:3px solid ${color};">
-          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:4px;">${speaker}</div>
-          <div style="font-size:13px;line-height:1.7;color:var(--text);">${text}</div>
-        </div>`;
-      }).join('');
-    } else {
-      // No speaker labels — show plain text
-      box.innerHTML = `<div style="font-size:13px;line-height:1.8;color:var(--text);">${raw}</div>`;
-    }
-  }
+  _applyTranscriptToModal(r);
 
   document.getElementById('call-modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function openCallModal(idx) {
+  _loadTranscriptsAndOpen(idx);
 }
 
 function closeCallModal() {
