@@ -580,7 +580,7 @@
     </div>
 
     <!-- Row 1: Reviews + Call Status + Monthly Trend -->
-    <div class="chart-row col-1-1-2">
+    <div class="chart-row col-3">
       <div class="chart-card">
         <div class="chart-head">
           <div>
@@ -615,12 +615,12 @@
             <div class="chart-subtitle">Total calls per month across selected period</div>
           </div>
         </div>
-        <div class="chart-wrap-md"><canvas id="chart-monthly-trend"></canvas></div>
+        <div class="chart-wrap-sm"><canvas id="chart-monthly-trend"></canvas></div>
       </div>
     </div>
 
-    <!-- Row 2: Lead Type Donut + Spend Trend + Impressions Trend -->
-    <div class="chart-row col-1-1-2">
+    <!-- Row 2: Call Type + Cost by Month + Impressions Trend -->
+    <div class="chart-row col-3">
       <div class="chart-card">
         <div class="chart-head">
           <div>
@@ -2934,17 +2934,18 @@ function renderReviews() {
     </div>
   `).join('');
 
+  panel.style.cssText = 'height:220px; display:flex; flex-direction:column; overflow:hidden;';
   panel.innerHTML = `
-    <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:8px; flex-shrink:0;">
       <div style="text-align:center; min-width:70px;">
-        <div style="font-size:42px; font-weight:800; line-height:1; color:var(--text);">${overall.rating}</div>
-        <div style="margin:4px 0 2px;">${starsHtml(overall.rating, 14)}</div>
-        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">${overall.count.toLocaleString()} reviews</div>
+        <div style="font-size:38px; font-weight:800; line-height:1; color:var(--text);">${overall.rating}</div>
+        <div style="margin:3px 0 2px;">${starsHtml(overall.rating, 13)}</div>
+        <div style="font-size:10px; color:var(--text-muted); font-weight:600;">${overall.count.toLocaleString()} reviews</div>
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:4px;">${distHtml}</div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:3px;">${distHtml}</div>
     </div>
-    <div style="display:flex; align-items:center; gap:5px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border);">
-      <svg width="13" height="13" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <div style="display:flex; align-items:center; gap:5px; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border); flex-shrink:0;">
+      <svg width="12" height="12" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/>
         <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.1 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 16.3 2 9.6 7.3 6.3 14.7z"/>
         <path fill="#FBBC05" d="M24 46c5.5 0 10.5-1.8 14.3-4.9l-6.6-5.4C29.6 37.5 26.9 38 24 38c-6.1 0-10.7-3.1-11.8-8.5l-7 5.4C8.6 42.3 15.7 46 24 46z"/>
@@ -2952,7 +2953,7 @@ function renderReviews() {
       </svg>
       <span style="font-size:11px; font-weight:700; color:#4285f4;">Google Reviews</span>
     </div>
-    <div class="reviews-list">${cardsHtml}</div>
+    <div class="reviews-list" style="flex:1; overflow-y:auto; min-height:0;">${cardsHtml}</div>
   `;
 }
 
