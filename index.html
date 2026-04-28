@@ -18,6 +18,65 @@
     .donut-center-label { font-size: 10px; font-weight: 700; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: .6px; margin-top: 3px; }
 
+    /* ── Call Detail Modal ── */
+    .call-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+      align-items: center; justify-content: center;
+    }
+    .call-modal-overlay.open { display: flex; }
+    .call-modal {
+      background: var(--surface); border-radius: 16px;
+      width: min(720px, 94vw); max-height: 88vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+    .call-modal-header {
+      background: var(--primary); padding: 18px 22px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-shrink: 0;
+    }
+    .call-modal-title { color: #fff; font-size: 15px; font-weight: 800; }
+    .call-modal-sub   { color: rgba(255,255,255,.6); font-size: 11px; font-weight: 500; margin-top: 3px; }
+    .call-modal-close {
+      background: rgba(255,255,255,.15); border: none; border-radius: 8px;
+      color: #fff; font-size: 18px; cursor: pointer; padding: 4px 10px;
+      line-height: 1; flex-shrink: 0; transition: background .15s;
+    }
+    .call-modal-close:hover { background: rgba(255,255,255,.3); }
+    .call-modal-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+    .call-modal-section { margin-bottom: 18px; }
+    .call-modal-section-title {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--primary); margin-bottom: 10px;
+    }
+    .call-modal-meta-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px;
+    }
+    .call-modal-meta-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; text-align: center;
+    }
+    .call-modal-meta-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+    .call-modal-meta-value { font-size: 13px; font-weight: 800; color: var(--text); }
+    .call-modal-transcript {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; font-size: 13px; line-height: 1.8;
+      color: var(--text); white-space: pre-wrap; word-break: break-word;
+      max-height: 300px; overflow-y: auto;
+    }
+    .call-modal-audio { width: 100%; margin-top: 4px; border-radius: 8px; outline: none; }
+    .call-modal-no-recording {
+      background: #f8fafc; border: 1px dashed var(--border); border-radius: 10px;
+      padding: 16px; text-align: center; color: var(--text-muted);
+      font-size: 12px; font-weight: 600;
+    }
+    .summary-link {
+      cursor: pointer; text-decoration: underline dotted;
+      text-underline-offset: 3px; transition: opacity .15s;
+    }
+    .summary-link:hover { opacity: .75; }
+
     /* ── Reviews & Ratings ── */
     .reviews-wrap { display: flex; gap: 24px; align-items: flex-start; }
     .reviews-summary { flex: 0 0 200px; text-align: center; }
@@ -3935,7 +3994,9 @@ function renderCallTable() {
     return `<span style="font-weight:700;color:${parsed ? '#f97316' : 'var(--primary)'};" title="${parsed ? 'Extracted from transcript' : 'Stored date'}">${fmtDate(date)}</span>`;
   };
 
-  tbody.innerHTML = rows.map(r => `
+  _modalRows = rows;
+
+  tbody.innerHTML = rows.map((r, idx) => `
     <tr>
       <td class="cell-bold">${fmtDate(r.date)}</td>
       <td style="color:var(--text-muted);font-weight:600;">${r.time}</td>
@@ -3963,8 +4024,8 @@ function renderCallTable() {
         const style = svcColors[svc] || { bg:'#f1f5f9', color:'#475569' };
         return `<span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;background:${style.bg};color:${style.color};">${svc}</span>`;
       })(detectService(r.summary))}</td>
-      <td style="max-width:220px;" title="${cleanSummary(r.summary).replace(/"/g,'&quot;')}">${(label => {
-        if (label === '—' || label === 'No transcript') return `<span style="color:#cbd5e1;font-style:italic;font-size:11px;">${label}</span>`;
+      <td style="max-width:220px;">${(label => {
+        const hasContent = label && label !== '—' && label !== 'No transcript';
         const cat = {
           'Emergency':       '#ef4444',
           'Insurance':       '#f97316',
@@ -3989,7 +4050,6 @@ function renderCallTable() {
           'Insulation':      '#64748b',
           'Solar':           '#64748b',
           'Fascia':          '#64748b',
-          'Requesting roof': '#64748b',
           'Skylight':        '#64748b',
           'Tarp':            '#64748b',
           'Wrong number':    '#94a3b8',
@@ -3998,8 +4058,9 @@ function renderCallTable() {
           'Partnership':     '#94a3b8',
         };
         let color = '#64748b';
-        for (const [k, v] of Object.entries(cat)) { if (label.startsWith(k)) { color = v; break; } }
-        return `<span style="display:inline-block;font-size:11px;font-weight:600;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;">${label}</span>`;
+        for (const [k, v] of Object.entries(cat)) { if (label && label.startsWith(k)) { color = v; break; } }
+        if (!hasContent) return `<span style="color:#cbd5e1;font-style:italic;font-size:11px;">${label||'—'}</span>`;
+        return `<span class="summary-link" onclick="openCallModal(${idx})" title="Click to view full transcript &amp; recording" style="display:inline-block;font-size:11px;font-weight:600;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;">${label}</span>`;
       })(summarizeCall(r.summary))}</td>
     </tr>`).join('');
 }
@@ -4255,6 +4316,121 @@ window.addEventListener('load', () => {
   buildMonthButtons();
   renderOverview();
 });
+/* ── Call Detail Modal ── */
+let _modalRows = [];
+
+function openCallModal(idx) {
+  const r = _modalRows[idx];
+  if (!r) return;
+
+  const fmtDate = d => {
+    const [y, m, day] = d.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[+m-1]} ${+day}, ${y}`;
+  };
+
+  const statusIcon = { answered:'✅', missed:'📵', abandoned:'⏸️' };
+  const fullText = cleanSummary(r.summary);
+
+  // Header meta
+  document.getElementById('modal-customer').textContent  = r.customerName || '—';
+  document.getElementById('modal-phone').textContent     = r.customerPhone || '—';
+  document.getElementById('modal-datetime').textContent  = `${fmtDate(r.date)} · ${r.time}`;
+  document.getElementById('modal-status').textContent    = `${statusIcon[r.status]||'📵'} ${r.status.charAt(0).toUpperCase()+r.status.slice(1)}`;
+  document.getElementById('modal-duration').textContent  = r.duration;
+  document.getElementById('modal-dispatch').textContent  = r.dispatchName || 'Not Mentioned';
+
+  // Transcript
+  document.getElementById('modal-transcript').textContent =
+    (fullText && fullText !== '—' && fullText !== 'No transcript') ? fullText : 'No transcript available for this call.';
+
+  // Recording
+  const audioWrap = document.getElementById('modal-audio-wrap');
+  const audioEl   = document.getElementById('modal-audio');
+  if (r.recordingUrl) {
+    audioEl.src = r.recordingUrl;
+    audioEl.load();
+    audioWrap.style.display = '';
+    document.getElementById('modal-no-recording').style.display = 'none';
+  } else {
+    audioWrap.style.display = 'none';
+    document.getElementById('modal-no-recording').style.display = '';
+  }
+
+  document.getElementById('call-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCallModal() {
+  document.getElementById('call-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  const audioEl = document.getElementById('modal-audio');
+  audioEl.pause();
+  audioEl.src = '';
+}
+
+// Close on overlay click
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('call-modal-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeCallModal();
+  });
+});
 </script>
+
+<!-- Call Detail Modal -->
+<div class="call-modal-overlay" id="call-modal-overlay">
+  <div class="call-modal">
+    <div class="call-modal-header">
+      <div>
+        <div class="call-modal-title" id="modal-customer">—</div>
+        <div class="call-modal-sub" id="modal-datetime">—</div>
+      </div>
+      <button class="call-modal-close" onclick="closeCallModal()">✕</button>
+    </div>
+    <div class="call-modal-body">
+
+      <!-- Meta grid -->
+      <div class="call-modal-meta-grid">
+        <div class="call-modal-meta-item">
+          <div class="call-modal-meta-label">Phone</div>
+          <div class="call-modal-meta-value" id="modal-phone">—</div>
+        </div>
+        <div class="call-modal-meta-item">
+          <div class="call-modal-meta-label">Status</div>
+          <div class="call-modal-meta-value" id="modal-status">—</div>
+        </div>
+        <div class="call-modal-meta-item">
+          <div class="call-modal-meta-label">Duration</div>
+          <div class="call-modal-meta-value" id="modal-duration">—</div>
+        </div>
+        <div class="call-modal-meta-item" style="grid-column:span 3;">
+          <div class="call-modal-meta-label">Dispatcher</div>
+          <div class="call-modal-meta-value" id="modal-dispatch">—</div>
+        </div>
+      </div>
+
+      <!-- Recording -->
+      <div class="call-modal-section">
+        <div class="call-modal-section-title">🎙️ Call Recording</div>
+        <div id="modal-audio-wrap">
+          <audio class="call-modal-audio" id="modal-audio" controls preload="none">
+            Your browser does not support audio playback.
+          </audio>
+        </div>
+        <div class="call-modal-no-recording" id="modal-no-recording">
+          🎙️ No recording URL available for this call
+        </div>
+      </div>
+
+      <!-- Transcript -->
+      <div class="call-modal-section">
+        <div class="call-modal-section-title">📝 Full Transcript</div>
+        <div class="call-modal-transcript" id="modal-transcript">—</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
