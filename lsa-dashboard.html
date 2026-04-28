@@ -65,12 +65,6 @@
       color: var(--text); white-space: pre-wrap; word-break: break-word;
       max-height: 300px; overflow-y: auto;
     }
-    .call-modal-audio { width: 100%; margin-top: 4px; border-radius: 8px; outline: none; }
-    .call-modal-no-recording {
-      background: #f8fafc; border: 1px dashed var(--border); border-radius: 10px;
-      padding: 16px; text-align: center; color: var(--text-muted);
-      font-size: 12px; font-weight: 600;
-    }
     .summary-link {
       cursor: pointer; text-decoration: underline dotted;
       text-underline-offset: 3px; transition: opacity .15s;
@@ -4330,7 +4324,6 @@ function openCallModal(idx) {
   };
 
   const statusIcon = { answered:'✅', missed:'📵', abandoned:'⏸️' };
-  const fullText = cleanSummary(r.summary);
 
   // Header meta
   document.getElementById('modal-customer').textContent  = r.customerName || '—';
@@ -4340,21 +4333,33 @@ function openCallModal(idx) {
   document.getElementById('modal-duration').textContent  = r.duration;
   document.getElementById('modal-dispatch').textContent  = r.dispatchName || 'Not Mentioned';
 
-  // Transcript
-  document.getElementById('modal-transcript').textContent =
-    (fullText && fullText !== '—' && fullText !== 'No transcript') ? fullText : 'No transcript available for this call.';
+  // Full transcript — format Caller / Agent lines with color coding
+  const box = document.getElementById('modal-transcript');
+  const raw = (r.summary || '').replace(/\\'/g, "'").trim();
 
-  // Recording
-  const audioWrap = document.getElementById('modal-audio-wrap');
-  const audioEl   = document.getElementById('modal-audio');
-  if (r.recordingUrl) {
-    audioEl.src = r.recordingUrl;
-    audioEl.load();
-    audioWrap.style.display = '';
-    document.getElementById('modal-no-recording').style.display = 'none';
+  if (!raw || raw === '—') {
+    box.innerHTML = '<span style="color:#94a3b8;font-style:italic;">No transcript available for this call.</span>';
   } else {
-    audioWrap.style.display = 'none';
-    document.getElementById('modal-no-recording').style.display = '';
+    // Split on Caller: / Agent: labels and render each turn
+    const lines = raw.split(/(?=\b(?:Caller|Agent):\s)/);
+    const hasSpeakers = /\b(?:Caller|Agent):\s/.test(raw);
+    if (hasSpeakers) {
+      box.innerHTML = lines.map(line => {
+        const m = line.match(/^(Caller|Agent):\s*([\s\S]*)/);
+        if (!m) return line ? `<div style="color:var(--text-muted);margin-bottom:6px;">${line}</div>` : '';
+        const speaker = m[1], text = m[2].trim();
+        const isAgent  = speaker === 'Agent';
+        const color    = isAgent ? 'var(--primary)' : 'var(--accent)';
+        const bg       = isAgent ? 'rgba(0,75,116,.06)' : 'rgba(215,137,31,.06)';
+        return `<div style="margin-bottom:10px;padding:8px 12px;border-radius:8px;background:${bg};border-left:3px solid ${color};">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:4px;">${speaker}</div>
+          <div style="font-size:13px;line-height:1.7;color:var(--text);">${text}</div>
+        </div>`;
+      }).join('');
+    } else {
+      // No speaker labels — show plain text
+      box.innerHTML = `<div style="font-size:13px;line-height:1.8;color:var(--text);">${raw}</div>`;
+    }
   }
 
   document.getElementById('call-modal-overlay').classList.add('open');
@@ -4364,9 +4369,6 @@ function openCallModal(idx) {
 function closeCallModal() {
   document.getElementById('call-modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
-  const audioEl = document.getElementById('modal-audio');
-  audioEl.pause();
-  audioEl.src = '';
 }
 
 // Close on overlay click
@@ -4406,19 +4408,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="call-modal-meta-item" style="grid-column:span 3;">
           <div class="call-modal-meta-label">Dispatcher</div>
           <div class="call-modal-meta-value" id="modal-dispatch">—</div>
-        </div>
-      </div>
-
-      <!-- Recording -->
-      <div class="call-modal-section">
-        <div class="call-modal-section-title">🎙️ Call Recording</div>
-        <div id="modal-audio-wrap">
-          <audio class="call-modal-audio" id="modal-audio" controls preload="none">
-            Your browser does not support audio playback.
-          </audio>
-        </div>
-        <div class="call-modal-no-recording" id="modal-no-recording">
-          🎙️ No recording URL available for this call
         </div>
       </div>
 
