@@ -739,6 +739,28 @@
         <div class="chart-wrap-md"><canvas id="chart-cr-dow"></canvas></div>
       </div>
 
+      <!-- Service Type + Dispatch charts -->
+      <div class="chart-row col-1-1" style="margin-bottom:20px;">
+        <div class="chart-card">
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Calls by Service Type</div>
+              <div class="chart-subtitle">What callers are inquiring about</div>
+            </div>
+          </div>
+          <div class="chart-wrap-md"><canvas id="chart-cr-service"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head">
+            <div>
+              <div class="chart-title">Leads by Dispatch</div>
+              <div class="chart-subtitle">Number of calls handled per dispatcher</div>
+            </div>
+          </div>
+          <div class="chart-wrap-md"><canvas id="chart-cr-dispatch"></canvas></div>
+        </div>
+      </div>
+
       <!-- Call Records Table -->
       <div class="chart-card" style="margin-bottom:20px;">
         <div class="chart-head">
@@ -3299,6 +3321,86 @@ function renderCallRail(cid, indices) {
       scales: {
         x: { ticks: { font: FONT, color: '#64748b' }, grid: { display: false } },
         y: { beginAtZero: true, ticks: { font: FONT, color: '#64748b', stepSize: 1 }, grid: { color: 'rgba(0,0,0,.04)' } },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          bodyFont: FONT, titleFont: { ...FONT, weight: '700' },
+          callbacks: { label: ctx => ` ${ctx.raw} call${ctx.raw !== 1 ? 's' : ''}` },
+        },
+      },
+    },
+  });
+
+  // ── Service Type doughnut ──
+  const svcOrder = [
+    'Roof repair', 'Roof damage repair', 'Roof installation', 'Roof inspection',
+    'Gutter repair', 'Gutter installation', 'Skylight repair', 'Skylight installation',
+    'Attic venting', 'Other',
+  ];
+  const svcColors = ['#3b82f6','#ef4444','#8b5cf6','#10b981','#0891b2','#06b6d4','#f59e0b','#fbbf24','#a78bfa','#94a3b8'];
+  const svcMap = {};
+  _crRecordsFiltered.forEach(r => {
+    const svc = detectService(r.summary) || 'Other';
+    svcMap[svc] = (svcMap[svc] || 0) + 1;
+  });
+  const svcLabels = [], svcData = [], svcBg = [];
+  svcOrder.forEach((s, i) => {
+    if (svcMap[s]) { svcLabels.push(s); svcData.push(svcMap[s]); svcBg.push(svcColors[i]); }
+  });
+  // Any unlisted categories
+  Object.entries(svcMap).forEach(([k, v]) => {
+    if (!svcOrder.includes(k)) { svcLabels.push(k); svcData.push(v); svcBg.push('#64748b'); }
+  });
+  makeChart('chart-cr-service', {
+    type: 'doughnut',
+    data: { labels: svcLabels, datasets: [{ data: svcData, backgroundColor: svcBg, borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }] },
+    options: {
+      ...baseOptions(),
+      cutout: '60%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { font: FONT, color: '#334155', boxWidth: 12, padding: 10 } },
+        tooltip: {
+          bodyFont: FONT, titleFont: { ...FONT, weight: '700' },
+          callbacks: {
+            label: ctx => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              return ` ${ctx.label}: ${ctx.raw} (${((ctx.raw / total) * 100).toFixed(1)}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // ── Dispatch bar chart ──
+  const dispMap = {};
+  _crRecordsFiltered.forEach(r => {
+    const name = (r.dispatchName && r.dispatchName.trim()) ? r.dispatchName.trim() : 'Not Mentioned';
+    dispMap[name] = (dispMap[name] || 0) + 1;
+  });
+  const dispSorted = Object.entries(dispMap).sort((a, b) => b[1] - a[1]);
+  const dispLabels = dispSorted.map(e => e[0]);
+  const dispData   = dispSorted.map(e => e[1]);
+  const dispColors = ['#38bdf8','#4ade80','#fb923c','#c084fc','#f43f5e','#14b8a6','#eab308','#64748b','#94a3b8'];
+  makeChart('chart-cr-dispatch', {
+    type: 'bar',
+    data: {
+      labels: dispLabels,
+      datasets: [{
+        label: 'Calls Handled',
+        data: dispData,
+        backgroundColor: dispLabels.map((_, i) => dispColors[i % dispColors.length]),
+        borderRadius: 6,
+        borderSkipped: 'start',
+      }],
+    },
+    options: {
+      ...baseOptions(),
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { font: FONT, color: '#64748b', stepSize: 1 }, grid: { color: 'rgba(0,0,0,.04)' } },
+        y: { ticks: { font: { ...FONT, weight: '600' }, color: '#334155' }, grid: { display: false } },
       },
       plugins: {
         legend: { display: false },
