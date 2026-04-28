@@ -17,6 +17,29 @@
     .donut-center-value { font-size: 24px; font-weight: 800; line-height: 1; color: var(--text); }
     .donut-center-label { font-size: 10px; font-weight: 700; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: .6px; margin-top: 3px; }
+
+    /* ── Reviews & Ratings ── */
+    .reviews-wrap { display: flex; gap: 24px; align-items: flex-start; }
+    .reviews-summary { flex: 0 0 200px; text-align: center; }
+    .reviews-big-score { font-size: 64px; font-weight: 800; line-height: 1; color: var(--text); }
+    .reviews-stars { display: flex; justify-content: center; gap: 3px; margin: 6px 0 4px; }
+    .reviews-stars span { font-size: 22px; }
+    .reviews-count { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .reviews-source { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
+      background: #f0f4ff; border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 700; color: #4285f4; }
+    .reviews-dist { flex: 0 0 180px; display: flex; flex-direction: column; gap: 5px; justify-content: center; }
+    .reviews-dist-row { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .reviews-dist-bar-wrap { flex: 1; height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .reviews-dist-bar { height: 100%; border-radius: 4px; background: #f59e0b; transition: width .4s; }
+    .reviews-dist-cnt { min-width: 28px; text-align: right; color: var(--text); }
+    .reviews-list { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 280px; }
+    .review-card { background: var(--surface2); border-radius: 10px; padding: 12px 14px; border-left: 3px solid #f59e0b; }
+    .review-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .review-card-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .review-card-date { font-size: 11px; color: var(--text-muted); }
+    .review-card-stars { font-size: 12px; margin-bottom: 5px; color: #f59e0b; }
+    .review-card-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
   </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -624,6 +647,24 @@
       </div>
     </div>
 
+    <!-- Reviews & Ratings Section -->
+    <div style="margin-bottom:20px;">
+      <div class="section-header">
+        <div class="section-title">⭐ Google Reviews &amp; Ratings</div>
+        <div class="section-subtitle">Action Roofing Services — verified Google Business Profile reviews</div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Customer Reviews</div>
+            <div class="chart-subtitle">Overall satisfaction based on Google reviews</div>
+          </div>
+          <span class="chart-badge">Verified Google Reviews</span>
+        </div>
+        <div class="reviews-wrap" id="reviews-panel"></div>
+      </div>
+    </div>
+
     <!-- Account Summary Cards (Overview only) -->
     <div id="acc-cards-section">
       <div class="section-header">
@@ -1006,6 +1047,21 @@ const PROFILE_DATA = {
     job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
     service_areas: ['Bay Minette','Daphne','Elberta','Fairhope','Foley','Gulf Shores','Lillian','Loxley','Mobile','Robertsdale','Silverhill','Spanish Fort','Summerdale'],
   },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   REVIEWS DATA
+═══════════════════════════════════════════════════════════════ */
+const REVIEWS_DATA = {
+  overall:  { rating: 4.9, count: 356, source: 'Google' },
+  distribution: { 5: 330, 4: 18, 3: 5, 2: 2, 1: 1 },
+  recent: [
+    { name: 'Jayne Barton',      stars: 5, date: 'Apr 24, 2026', text: 'The two guys that fixed our leaking roof did an excellent job. Great communication and quality workmanship with impressive before/after documentation of the repair.' },
+    { name: 'Karyn Rosenstock',  stars: 5, date: 'Apr 24, 2026', text: "Chris has always been a great help with honest solutions! The team's work has always been top notch." },
+    { name: 'Donna Barbieri',    stars: 5, date: 'Apr 21, 2026', text: 'Pete was very helpful. Thanks.' },
+    { name: 'Lou Leonardo',      stars: 5, date: 'Apr 21, 2026', text: 'Great service.' },
+    { name: 'Debra Mendelson',   stars: 5, date: 'Apr 14, 2026', text: 'Chris is a great guy and very knowledgeable of all things regarding roofing.' },
+  ],
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2827,6 +2883,9 @@ function renderOverview() {
     },
   });
 
+  /* ── Reviews & Ratings ── */
+  renderReviews();
+
   /* ── Account Cards & Comparison (Overview only) ── */
   const accSection = document.getElementById('acc-cards-section');
   if (state.cid === 'all') {
@@ -2840,6 +2899,65 @@ function renderOverview() {
 
   /* ── CallRail Section (per-CID only) ── */
   renderCallRail(state.cid, idx);
+}
+
+function renderReviews() {
+  const panel = document.getElementById('reviews-panel');
+  if (!panel) return;
+  const { overall, distribution, recent } = REVIEWS_DATA;
+
+  // Stars helper
+  const starsHtml = (n, size = 22) => {
+    const full = Math.floor(n), half = (n - full) >= 0.5;
+    let s = '';
+    for (let i = 0; i < full; i++) s += `<span style="font-size:${size}px;color:#f59e0b;">★</span>`;
+    if (half)                        s += `<span style="font-size:${size}px;color:#f59e0b;">✩</span>`;
+    for (let i = full + (half ? 1 : 0); i < 5; i++) s += `<span style="font-size:${size}px;color:#dde3ed;">★</span>`;
+    return s;
+  };
+
+  // Distribution bars
+  const totalDist = Object.values(distribution).reduce((a,b) => a+b, 0);
+  const distHtml = [5,4,3,2,1].map(n => {
+    const cnt = distribution[n] || 0;
+    const pct = totalDist > 0 ? (cnt / totalDist * 100).toFixed(1) : 0;
+    return `<div class="reviews-dist-row">
+      <span>${n}★</span>
+      <div class="reviews-dist-bar-wrap"><div class="reviews-dist-bar" style="width:${pct}%"></div></div>
+      <span class="reviews-dist-cnt">${cnt}</span>
+    </div>`;
+  }).join('');
+
+  // Recent review cards
+  const cardsHtml = recent.map(r => `
+    <div class="review-card">
+      <div class="review-card-head">
+        <span class="review-card-name">${r.name}</span>
+        <span class="review-card-date">${r.date}</span>
+      </div>
+      <div class="review-card-stars">${starsHtml(r.stars, 13)}</div>
+      <div class="review-card-text">${r.text}</div>
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="reviews-summary">
+      <div class="reviews-big-score">${overall.rating}</div>
+      <div class="reviews-stars">${starsHtml(overall.rating)}</div>
+      <div class="reviews-count">${overall.count.toLocaleString()} reviews</div>
+      <div class="reviews-source">
+        <svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/>
+          <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.1 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 16.3 2 9.6 7.3 6.3 14.7z"/>
+          <path fill="#FBBC05" d="M24 46c5.5 0 10.5-1.8 14.3-4.9l-6.6-5.4C29.6 37.5 26.9 38 24 38c-6.1 0-10.7-3.1-11.8-8.5l-7 5.4C8.6 42.3 15.7 46 24 46z"/>
+          <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.6-2.6 4.7-4.9 6.1l6.6 5.4C41.8 36.3 45 30.7 45 24c0-1.3-.2-2.7-.5-4z"/>
+        </svg>
+        Google Reviews
+      </div>
+    </div>
+    <div class="reviews-dist">${distHtml}</div>
+    <div class="reviews-list">${cardsHtml}</div>
+  `;
 }
 
 function renderAccountCards(idx) {
