@@ -968,75 +968,130 @@
 /* ═══════════════════════════════════════════════════════════════
    BUSINESS PROFILE DATA  (pulled via Google Ads API v24)
 ═══════════════════════════════════════════════════════════════ */
+/* Shared profile fields applied to every CID */
+const _SHARED_PROFILE = {
+  company:        'Action Roofing Services',
+  website:        'actionroofing.com',
+  phone_main:     '866-506-4780',
+  established:    1986,
+  status:         'Active',
+  google_guaranteed: true,
+  background_checked: true,
+  insurance:      'Fully insured & bonded',
+  certifications: ['FEMA Approved Contractor', 'Google Guaranteed', 'Google Screened'],
+  languages:      ['English', 'Spanish'],
+  property_types: ['Single-Family Home', 'Townhome / Condo', 'Commercial Building', 'New Construction'],
+  roofing_materials: ['Asphalt Shingle', 'Tile (Clay & Cement)', 'Metal (Standing Seam & 5-V Crimp)', 'Modified Bitumen', 'Built-Up / Flat', 'TPO / EPDM'],
+  job_types: [
+    'Roof Installation',
+    'Roof Replacement / Re-Roof',
+    'Roof Repair',
+    'Emergency Roof Repair',
+    'Storm Damage Repair',
+    'Roof Inspection',
+    'Wind Mitigation Inspection',
+    'Four-Point Inspection',
+    'Roof Maintenance',
+    'Flat / Commercial Roofing',
+    'Gutter Installation',
+    'Gutter Repair & Cleaning',
+    'Skylight Installation',
+    'Skylight Repair',
+    'Attic Venting / Ridge Vents',
+    'Roof Tarp / Emergency Cover',
+  ],
+};
+
 const PROFILE_DATA = {
   cid1: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Ocala',
     cid: '4962391276',
+    phone: '496-239-1276',
     region: 'Ocala, FL',
+    address: 'Ocala, FL 34470',
     daily_budget: 1464.29,
     weekly_budget: 10250.03,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['FL: CCC 054753', 'FL: CCC 1336714'],
     service_areas: ['Alachua','Anthony','Archer','Bell','Belleview','Beverly Hills','Bronson','Bushnell','Chiefland','Crystal River','DeLand','Deltona','Dunnellon','Floral City','Gainesville','Hawthorne','Hernando','High Springs','Homosassa','Inglis','Inverness','Lady Lake','Lake Butler','Lake Panasoffkee','Lecanto','Leesburg','Melrose','Mount Dora','Newberry','Ocala','Okahumpka','Ormond Beach','Palatka','Palm Bay','Reddick','Silver Springs','Summerfield','Tavares','The Villages','Trenton','Umatilla','Waldo','Webster','Weirsdale','Wildwood','Williston'],
   },
   cid2: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Pompano Beach',
     cid: '4337676764',
+    phone: '433-767-6764',
     region: 'Pompano Beach, FL',
+    address: '3009 NW 25th Ave, Bay 1, Pompano Beach, FL 33069',
     daily_budget: 3571.43,
     weekly_budget: 25000.01,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['FL: CCC 054753', 'FL: CCC 1336714'],
     service_areas: ['Boca Raton','Boynton Beach','Broward County','Coconut Creek','Coral Springs','Dania Beach','Deerfield Beach','Delray Beach','Fort Lauderdale','Greenacres','Hobe Sound','Hollywood','Juno Beach','Jupiter','Kings Point','Lake Worth Beach','Lantana','Loxahatchee Groves','Margate','Mission Bay','North Palm Beach','Palm Beach','Palm Beach Gardens','Palm City','Palm Springs','Pembroke Pines','Plantation','Pompano Beach','Riviera Beach','Royal Palm Beach','Sandalfoot Cove','Stuart','Tamarac','Tequesta','Wellington','West Palm Beach','Whisper Walk'],
   },
   cid3: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Stuart',
     cid: '7404951376',
+    phone: '740-495-1376',
     region: 'Stuart, FL',
+    address: 'Stuart, FL 34994',
     daily_budget: 928.57,
     weekly_budget: 6499.99,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['FL: CCC 054753', 'FL: CCC 1336714'],
     service_areas: ['Boca Raton','Boynton Beach','Delray Beach','Florida Ridge','Fort Pierce','Fort Pierce North','Fort Pierce South','Gifford','Greenacres','Hobe Sound','Indian River Shores','Indiantown','Jensen Beach','Juno Beach','Jupiter','Lake Park','Lake Worth Beach','Lakewood Park','Loxahatchee Groves','Melbourne','North Palm Beach','Okeechobee','Palm Bay','Palm Beach','Palm Beach Gardens','Palm City','Palm Springs','Port Salerno','Port St. Lucie','Riviera Beach','Royal Palm Beach','St. Lucie County','Stuart','Tequesta','Vero Beach','Vero Beach South','Wabasso','Wabasso Beach','Wellington','West Palm Beach','White City'],
   },
   cid4: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Tampa',
     cid: '9221987864',
+    phone: '922-198-7864',
     region: 'Tampa, FL',
+    address: 'Tampa, FL 33602',
     daily_budget: 1500.00,
     weekly_budget: 10500.00,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['FL: CCC 054753', 'FL: CCC 1336714'],
     service_areas: ['Anna Maria','Auburndale','Bartow','Bradenton','Brandon','Brooksville','Clearwater','Crystal Beach','Dade City','Dover','Dunedin','Ellenton','Englewood','Fish Hawk','Gibsonton','Holiday','Holmes Beach','Hudson','Lakeland','Lakewood Ranch','Largo','Lithia','Longboat Key','Lutz','Myakka City','New Port Richey','Nokomis','North Port','Odessa','Oldsmar','Osprey','Palm Harbor','Palmetto','Pinellas Park','Riverview','Ruskin','Sarasota','Seffner','Seminole','Spring Hill','St. Petersburg','Tampa','Tarpon Springs','Thonotosassa','Venice','Weeki Wachee Gardens','Wesley Chapel','Winter Haven','Zephyrhills'],
   },
   cid5: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Miami',
     cid: '8696565076',
+    phone: '869-656-5076',
     region: 'Miami, FL',
+    address: 'Miami / Doral, FL',
     daily_budget: 928.57,
     weekly_budget: 6499.99,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['FL: CCC 054753', 'FL: CCC 1336714'],
     service_areas: ['Coral Gables','Country Walk','Cutler Bay','Doral','Florida City','Glenvar Heights','Hallandale Beach','Hialeah','Homestead','Islamorada','Kendall','Key Biscayne','Key Largo','Leisure City','Miami','Miami Beach','Miami Gardens','Miami Lakes','Miami Shores','Naranja','North Miami Beach','Opa-locka','Palmetto Bay','Pinecrest','South Miami','Tamiami','Tavernier','The Hammocks','Westchester'],
   },
   cid6: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Pensacola',
     cid: '4717829952',
+    phone: '471-782-9952',
     region: 'Pensacola, FL',
+    address: 'Pensacola, FL 32501',
     daily_budget: 7928.57,
     weekly_budget: 55499.99,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['FL: CCC 054753', 'FL: CCC 1336714'],
     service_areas: ['Bellview','Brent','Cantonment','Century','DeFuniak Springs','Ensley','Ferry Pass','Gulf Breeze','Jay','Milton','Molino','Myrtle Grove','Pace','Pensacola','Pensacola Beach','Warrington','West Pensacola'],
   },
   cid7: {
+    ..._SHARED_PROFILE,
     name: 'Action Roofing — Silverhill',
     cid: '1852100121',
+    phone: '185-210-0121',
     region: 'Silverhill, AL',
+    address: 'Silverhill, AL 36576',
     daily_budget: 1785.71,
     weekly_budget: 12499.97,
     bidding_strategy: 'Maximize Conversions',
-    job_types: ['Roof Repair', 'Roof Replacement', 'Roof Installation', 'Roof Inspection'],
+    licenses: ['AL: AL40969'],
     service_areas: ['Bay Minette','Daphne','Elberta','Fairhope','Foley','Gulf Shores','Lillian','Loxley','Mobile','Robertsdale','Silverhill','Spanish Fort','Summerdale'],
   },
 };
@@ -4052,10 +4107,25 @@ function switchTab(tab) {
    BUSINESS PROFILE RENDERER
 ═══════════════════════════════════════════════════════════════ */
 function renderProfile() {
-  // Determine which CIDs to show
   const cid = state.cid;
   const keys = cid === 'all' ? ['cid1','cid2','cid3','cid4','cid5','cid6','cid7'] : [cid];
   const container = document.getElementById('profile-cards-container');
+
+  const tag = (text, bg, color, border) =>
+    `<span style="display:inline-block;background:${bg};color:${color};${border?'border:1px solid '+border+';':''}font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin:2px 3px;">${text}</span>`;
+
+  const sectionHead = (icon, label, count) =>
+    `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+      <span>${icon}</span> ${label}
+      ${count != null ? `<span style="font-size:10px;font-weight:600;color:var(--text-muted);margin-left:4px;">(${count})</span>` : ''}
+    </div>`;
+
+  const metaRow = (icon, label, value) =>
+    `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:14px;flex-shrink:0;">${icon}</span>
+      <span style="font-size:11px;font-weight:700;color:var(--text-muted);min-width:110px;flex-shrink:0;">${label}</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text);">${value}</span>
+    </div>`;
 
   container.innerHTML = keys.map(key => {
     const p = PROFILE_DATA[key];
@@ -4063,67 +4133,112 @@ function renderProfile() {
 
     const budgetDaily  = '$' + p.daily_budget.toLocaleString(undefined, {minimumFractionDigits:2,maximumFractionDigits:2});
     const budgetWeekly = '$' + p.weekly_budget.toLocaleString(undefined, {minimumFractionDigits:2,maximumFractionDigits:2});
+    const years = new Date().getFullYear() - p.established;
 
-    // Service areas tags
-    const areaTags = p.service_areas.map(a =>
-      `<span style="display:inline-block;background:var(--primary-light);color:var(--primary-dark);font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin:2px 3px;">${a}</span>`
-    ).join('');
+    // Badges row
+    const badges = [
+      p.google_guaranteed  ? tag('✅ Google Guaranteed', '#e8f5e9','#166534','#bbf7d0') : '',
+      p.background_checked ? tag('🔍 Background Checked','#eff6ff','#1d4ed8','#bfdbfe') : '',
+      p.status === 'Active' ? tag('● Active', '#f0fdf4','#166534','#bbf7d0') : tag('● Paused','#fef9c3','#854d0e','#fde68a'),
+    ].join('');
 
-    // Job types
-    const jobTags = (p.job_types || []).map(j =>
-      `<span style="display:inline-block;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin:2px 3px;">${j}</span>`
-    ).join('');
+    // Certifications
+    const certTags = (p.certifications||[]).map(c => tag(c,'#fef9c3','#854d0e','#fde68a')).join('');
+    const licenseTags = (p.licenses||[]).map(l => tag(l,'#f5f3ff','#5b21b6','#ddd6fe')).join('');
+    const langTags = (p.languages||[]).map(l => tag(l,'#f0f9ff','#0369a1','#bae6fd')).join('');
+    const propTags = (p.property_types||[]).map(t => tag(t,'var(--surface2)','var(--text-muted)','var(--border)')).join('');
+    const matTags = (p.roofing_materials||[]).map(m => tag(m,'#fff7ed','#9a3412','#fed7aa')).join('');
+    const jobTags = (p.job_types||[]).map(j => tag(j,'#f0fdf4','#166534','#bbf7d0')).join('');
+    const areaTags = p.service_areas.map(a => tag(a,'var(--primary-light)','var(--primary-dark)',null)).join('');
 
     return `
     <div class="chart-card" style="padding:0;overflow:hidden;">
-      <!-- Card Header -->
+
+      <!-- Header -->
       <div style="background:var(--primary);padding:18px 22px;display:flex;align-items:center;gap:14px;">
-        <div style="width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏢</div>
-        <div>
-          <div style="color:#fff;font-size:15px;font-weight:800;">${p.name}</div>
-          <div style="color:rgba(255,255,255,.55);font-size:11px;font-weight:500;margin-top:2px;">CID: ${p.cid} &nbsp;·&nbsp; ${p.region}</div>
+        <div style="width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏢</div>
+        <div style="flex:1;">
+          <div style="color:#fff;font-size:16px;font-weight:800;">${p.name}</div>
+          <div style="color:rgba(255,255,255,.6);font-size:11px;font-weight:500;margin-top:3px;">
+            CID: ${p.cid} &nbsp;·&nbsp; ${p.region} &nbsp;·&nbsp; ${p.phone}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:6px 12px;color:#fff;font-size:11px;font-weight:700;">
+            Est. ${p.established} &nbsp;·&nbsp; ${years} yrs
+          </div>
         </div>
       </div>
 
       <div style="padding:20px 22px;">
 
-        <!-- ── Budget & Bidding ── -->
+        <!-- Status badges -->
+        <div style="margin-bottom:18px;line-height:2;">${badges}</div>
+
+        <!-- ── Account Info ── -->
         <div style="margin-bottom:20px;">
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-            <span>💰</span> Budget &amp; Bidding
+          ${sectionHead('📋','Account Info',null)}
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:4px 14px;">
+            ${metaRow('🌐','Website','<a href="https://'+p.website+'" target="_blank" style="color:var(--primary);text-decoration:none;">'+p.website+'</a>')}
+            ${metaRow('📞','Tracking Phone',p.phone)}
+            ${metaRow('☎️','Main Phone',p.phone_main)}
+            ${metaRow('📍','Address',p.address || p.region)}
+            ${metaRow('🏷️','CID',p.cid)}
+            ${metaRow('⚡','Bidding Strategy',p.bidding_strategy)}
+            ${metaRow('🛡️','Insurance',p.insurance)}
+            ${metaRow('🗣️','Languages',p.languages.join(' · '))}
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;">
+        </div>
+
+        <!-- ── Budget ── -->
+        <div style="margin-bottom:20px;">
+          ${sectionHead('💰','Budget & Spend',null)}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;text-align:center;">
               <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Daily Budget</div>
-              <div style="font-size:17px;font-weight:800;color:var(--primary);">${budgetDaily}</div>
+              <div style="font-size:20px;font-weight:800;color:var(--primary);">${budgetDaily}</div>
             </div>
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;text-align:center;">
               <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Avg Weekly Budget</div>
-              <div style="font-size:17px;font-weight:800;color:var(--accent);">${budgetWeekly}</div>
-            </div>
-            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;">
-              <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Bidding Strategy</div>
-              <div style="font-size:12px;font-weight:800;color:var(--green);">${p.bidding_strategy}</div>
+              <div style="font-size:20px;font-weight:800;color:var(--accent);">${budgetWeekly}</div>
             </div>
           </div>
         </div>
 
-        <!-- ── Job Types ── -->
+        <!-- ── Licenses & Certifications ── -->
         <div style="margin-bottom:20px;">
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-            <span>🔨</span> Job Types
-            <span style="font-size:10px;font-weight:600;color:var(--text-muted);margin-left:4px;">(${(p.job_types||[]).length})</span>
-          </div>
-          <div style="line-height:2;">${jobTags}</div>
+          ${sectionHead('📜','Licenses & Certifications',null)}
+          <div style="line-height:2.2;">${licenseTags}${certTags}</div>
+        </div>
+
+        <!-- ── Job Types / Services ── -->
+        <div style="margin-bottom:20px;">
+          ${sectionHead('🔨','LSA Job Types / Services', p.job_types.length)}
+          <div style="line-height:2.2;">${jobTags}</div>
+        </div>
+
+        <!-- ── Roofing Materials ── -->
+        <div style="margin-bottom:20px;">
+          ${sectionHead('🏗️','Roofing Materials & Systems', p.roofing_materials.length)}
+          <div style="line-height:2.2;">${matTags}</div>
+        </div>
+
+        <!-- ── Property Types ── -->
+        <div style="margin-bottom:20px;">
+          ${sectionHead('🏠','Property Types Served', p.property_types.length)}
+          <div style="line-height:2.2;">${propTags}</div>
+        </div>
+
+        <!-- ── Languages ── -->
+        <div style="margin-bottom:20px;">
+          ${sectionHead('🗣️','Languages',null)}
+          <div style="line-height:2.2;">${langTags}</div>
         </div>
 
         <!-- ── Service Areas ── -->
         <div>
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-            <span>📍</span> Service Areas
-            <span style="font-size:10px;font-weight:600;color:var(--text-muted);margin-left:4px;">(${p.service_areas.length} cities)</span>
-          </div>
-          <div style="max-height:180px;overflow-y:auto;padding:2px 0;line-height:2.2;">
+          ${sectionHead('📍','Service Areas', p.service_areas.length + ' cities')}
+          <div style="max-height:200px;overflow-y:auto;padding:2px 0;line-height:2.3;">
             ${areaTags}
           </div>
         </div>
