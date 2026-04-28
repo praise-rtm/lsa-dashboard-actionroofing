@@ -2573,6 +2573,17 @@ function monthIndicesFromDates(from, to) {
   }, []);
 }
 
+/* Always returns 3 months ending at the latest month in monthIndices,
+   so trend charts show context even when a single month is filtered. */
+function getTrendIndices(monthIndices) {
+  if (!monthIndices || monthIndices.length === 0) return monthIndices;
+  const maxIdx = Math.max(...monthIndices);
+  const startIdx = Math.max(0, maxIdx - 2);
+  const result = [];
+  for (let i = startIdx; i <= maxIdx; i++) result.push(i);
+  return result;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    CHART REGISTRY
 ═══════════════════════════════════════════════════════════════ */
@@ -2617,8 +2628,11 @@ function baseOptions(extra = {}) {
 ═══════════════════════════════════════════════════════════════ */
 function renderOverview() {
   const idx = state.monthIndices;
+  const trendIdx = getTrendIndices(idx);
   const agg = getAggregated(state.cid, idx);
+  const trendAgg = getAggregated(state.cid, trendIdx);
   const labels = pickArr(MONTHS, idx);
+  const trendLabels = pickArr(MONTHS, trendIdx);
 
   /* heading */
   const cidInfo = state.cid === 'all'
@@ -2684,12 +2698,12 @@ function renderOverview() {
   ].map(([l,c]) => `<div class="legend-item"><span class="legend-swatch" style="background:${c}"></span>${l}</div>`).join('');
 
   /* ── Monthly Trend Line ── */
-  const monthlyLeads  = agg.monthly.map(m => m.leads);
-  const monthlyCharged = agg.monthly.map(m => m.charged);
+  const monthlyLeads  = trendAgg.monthly.map(m => m.leads);
+  const monthlyCharged = trendAgg.monthly.map(m => m.charged);
   makeChart('chart-monthly-trend', {
     type: 'line',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [
         {
           label: 'Total Calls',
@@ -2759,10 +2773,10 @@ function renderOverview() {
   makeChart('chart-spend', {
     type: 'bar',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [{
         label: 'Cost ($)',
-        data: agg.monthly.map(m => m.spend),
+        data: trendAgg.monthly.map(m => m.spend),
         backgroundColor: THEME.accent,
         borderRadius: 6, borderSkipped: 'start',
       }],
@@ -2788,10 +2802,10 @@ function renderOverview() {
   makeChart('chart-impressions', {
     type: 'line',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [{
         label: 'Impressions',
-        data: agg.monthly.map(m => m.impressions),
+        data: trendAgg.monthly.map(m => m.impressions),
         borderColor: THEME.purple,
         backgroundColor: 'rgba(139,92,246,.08)',
         borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
@@ -3163,6 +3177,8 @@ function renderCallRail(cid, indices) {
   crNone.classList.add('hidden');
 
   const labels = pickArr(MONTHS, indices);
+  const trendIndices = getTrendIndices(indices);
+  const trendLabels  = pickArr(MONTHS, trendIndices);
 
   // Aggregate over selected months
   const totalCalls    = sumArr(cr.calls,       indices);
@@ -3197,11 +3213,11 @@ function renderCallRail(cid, indices) {
   makeChart('chart-cr-volume', {
     type: 'bar',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [
-        { label: 'Answered', data: pickArr(cr.answered, indices),
+        { label: 'Answered', data: pickArr(cr.answered, trendIndices),
           backgroundColor: THEME.green,  borderRadius: 5, borderSkipped: 'start' },
-        { label: 'Missed',   data: pickArr(cr.missed,   indices),
+        { label: 'Missed',   data: pickArr(cr.missed,   trendIndices),
           backgroundColor: THEME.red,    borderRadius: 5, borderSkipped: 'start' },
       ],
     },
@@ -3223,11 +3239,11 @@ function renderCallRail(cid, indices) {
   makeChart('chart-cr-callers', {
     type: 'bar',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [
-        { label: 'First-Time', data: pickArr(cr.firstTime, indices),
+        { label: 'First-Time', data: pickArr(cr.firstTime, trendIndices),
           backgroundColor: THEME.primary, borderRadius: 5, borderSkipped: 'start' },
-        { label: 'Repeat',     data: pickArr(cr.repeat,    indices),
+        { label: 'Repeat',     data: pickArr(cr.repeat,    trendIndices),
           backgroundColor: THEME.teal,    borderRadius: 5, borderSkipped: 'start' },
       ],
     },
@@ -3246,13 +3262,13 @@ function renderCallRail(cid, indices) {
   });
 
   // ── Answer Rate line ──
-  const answerRates = indices.map(i =>
+  const answerRates = trendIndices.map(i =>
     cr.calls[i] > 0 ? +(cr.answered[i] / cr.calls[i] * 100).toFixed(1) : 0
   );
   makeChart('chart-cr-answerrate', {
     type: 'line',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [{
         label: 'Answer Rate (%)',
         data: answerRates,
@@ -3413,11 +3429,11 @@ function renderCallRail(cid, indices) {
   });
 
   // ── Avg Duration line ──
-  const durData = indices.map(i => +(cr.avgDuration[i] / 60).toFixed(2));
+  const durData = trendIndices.map(i => +(cr.avgDuration[i] / 60).toFixed(2));
   makeChart('chart-cr-duration-trend', {
     type: 'line',
     data: {
-      labels,
+      labels: trendLabels,
       datasets: [{
         label: 'Avg Duration (min)',
         data: durData,
