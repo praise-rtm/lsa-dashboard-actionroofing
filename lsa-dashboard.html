@@ -579,26 +579,18 @@
       </div>
     </div>
 
-    <!-- Reviews & Ratings Section -->
-    <div style="margin-bottom:20px;">
-      <div class="section-header">
-        <div class="section-title">⭐ Google Reviews &amp; Ratings</div>
-        <div class="section-subtitle">Action Roofing Services — verified Google Business Profile reviews</div>
-      </div>
+    <!-- Row 1: Reviews + Call Status + Monthly Trend -->
+    <div class="chart-row col-1-1-2">
       <div class="chart-card">
         <div class="chart-head">
           <div>
-            <div class="chart-title">Customer Reviews</div>
-            <div class="chart-subtitle">Overall satisfaction based on Google reviews</div>
+            <div class="chart-title">⭐ Google Reviews</div>
+            <div class="chart-subtitle">Verified Google Business Profile</div>
           </div>
-          <span class="chart-badge">Verified Google Reviews</span>
+          <span class="chart-badge">Google ✓</span>
         </div>
-        <div class="reviews-wrap" id="reviews-panel"></div>
+        <div id="reviews-panel"></div>
       </div>
-    </div>
-
-    <!-- Row 1: Lead Status Donut + Monthly Trend Line -->
-    <div class="chart-row col-1-3">
       <div class="chart-card">
         <div class="chart-head">
           <div>
@@ -2941,21 +2933,23 @@ function renderReviews() {
   `).join('');
 
   panel.innerHTML = `
-    <div class="reviews-summary">
-      <div class="reviews-big-score">${overall.rating}</div>
-      <div class="reviews-stars">${starsHtml(overall.rating)}</div>
-      <div class="reviews-count">${overall.count.toLocaleString()} reviews</div>
-      <div class="reviews-source">
-        <svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/>
-          <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.1 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 16.3 2 9.6 7.3 6.3 14.7z"/>
-          <path fill="#FBBC05" d="M24 46c5.5 0 10.5-1.8 14.3-4.9l-6.6-5.4C29.6 37.5 26.9 38 24 38c-6.1 0-10.7-3.1-11.8-8.5l-7 5.4C8.6 42.3 15.7 46 24 46z"/>
-          <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.6-2.6 4.7-4.9 6.1l6.6 5.4C41.8 36.3 45 30.7 45 24c0-1.3-.2-2.7-.5-4z"/>
-        </svg>
-        Google Reviews
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+      <div style="text-align:center; min-width:70px;">
+        <div style="font-size:42px; font-weight:800; line-height:1; color:var(--text);">${overall.rating}</div>
+        <div style="margin:4px 0 2px;">${starsHtml(overall.rating, 14)}</div>
+        <div style="font-size:11px; color:var(--text-muted); font-weight:600;">${overall.count.toLocaleString()} reviews</div>
       </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:4px;">${distHtml}</div>
     </div>
-    <div class="reviews-dist">${distHtml}</div>
+    <div style="display:flex; align-items:center; gap:5px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border);">
+      <svg width="13" height="13" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/>
+        <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16.1 19.2 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 16.3 2 9.6 7.3 6.3 14.7z"/>
+        <path fill="#FBBC05" d="M24 46c5.5 0 10.5-1.8 14.3-4.9l-6.6-5.4C29.6 37.5 26.9 38 24 38c-6.1 0-10.7-3.1-11.8-8.5l-7 5.4C8.6 42.3 15.7 46 24 46z"/>
+        <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.6-2.6 4.7-4.9 6.1l6.6 5.4C41.8 36.3 45 30.7 45 24c0-1.3-.2-2.7-.5-4z"/>
+      </svg>
+      <span style="font-size:11px; font-weight:700; color:#4285f4;">Google Reviews</span>
+    </div>
     <div class="reviews-list">${cardsHtml}</div>
   `;
 }
